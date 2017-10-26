@@ -1,0 +1,25 @@
+:root {
+	background: black;
+}
+
+h1, p {
+	font-size: 1em;
+}
+
+button {
+	background: red;
+	border: solid;
+	color: white;
+}
+
+h1, p {
+	font-family: sans-serif;
+}
+
+* {
+	color: white;
+}
+
+input {
+	color: blue;
+}

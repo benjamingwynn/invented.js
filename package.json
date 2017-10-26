@@ -1,0 +1,11 @@
+{
+  "name": "invented",
+  "version": "0.0.1",
+  "description": "A tiny library to compose reusable web components using SSR and Progressive Enchancement.",
+  "main": ".",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Benjamin Gwynn <xenxier@xenxier.com>",
+  "license": "GPL-3.0"
+}
