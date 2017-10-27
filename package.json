@@ -7,5 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Benjamin Gwynn <xenxier@xenxier.com>",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@types/css": "^0.0.30",
+    "@types/jsdom": "^11.0.3",
+    "@types/node": "^8.0.47",
+    "css": "^2.2.1"
+  }
 }
