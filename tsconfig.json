@@ -2,10 +2,11 @@
 	"compilerOptions": {
 		"target": "es6",
 		"module": "commonjs",
-		"sourceMap": true,
+		// "sourceMap": true,
 		"baseUrl": "src",
 		"noImplicitAny": true,
 		"outDir": "build", // output directory to build
-		"strict": true
+		"strict": true,
+		"inlineSourceMap": true
 	}
 }
