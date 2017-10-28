@@ -4,12 +4,15 @@ import * as css from "css"
 
 import {Component, ComponentInstance} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
+import {CSSNamespace} from "./CSSNamespace"
 
-// Flags errors when trying to use document as a global
+// Document is not a global.
 const document = null
 
 // load the built context to inject
 const CONTEXT_JS = fs.readFileSync("./lib/Context.js").toString()
+
+const noJSClass = new CSSNamespace().namespace
 
 export class Page {
 	private dom:jsdom.JSDOM
@@ -32,6 +35,7 @@ export class Page {
 	constructor (html:string, composer:ComponentComposer) {
 		// Construct DOM
 		this.dom = new jsdom.JSDOM(html)
+		const document = this.dom.window.document
 
 		// Store the promises for the components
 		const componentBuilders:{[index:string] : Promise<Component>} = {}
@@ -39,12 +43,18 @@ export class Page {
 
 		let loadedContextJS:boolean
 
+		console.log("Injecting common CSS into the page")
+
+		const style = document.createElement("style")
+		style.innerHTML = `.${noJSClass}{display: none}`
+		style.id = "invented-hide-nojs-stylesheet"
+		document.head.appendChild(style)
+
 		// Iterate through components looking for unknown elements
 		this.getDOMUnknowns((node) => { // heads up, this is a loop - it's syncronous
 
 			// I don't know what element this is, so construct its component
 			const componentName = node.tagName.toLowerCase()
-			const document = this.dom.window.document
 
 			// Construct the component if it isn't already under construction/finished construction
 			if (!componentBuilders[componentName]) {
@@ -150,6 +160,13 @@ export class Page {
 
 		// Once all of the components are built, fire the callback
 		this.ready = Promise.all(componentBuildersArray)
+
+		this.ready.then(() => {
+			document.querySelectorAll("[js-only]").forEach((node) => {
+				console.log("Found node which should only be shown when JS is enabled")
+				node.classList.add(noJSClass)
+			})
+		})
 	}
 
 	public render () : string {

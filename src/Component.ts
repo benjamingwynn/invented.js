@@ -42,7 +42,7 @@ export class ComponentInstance {
 		wrapper.innerHTML = this.component.dom.window.document.body.innerHTML
 
 		if (this.component.css) {
-			wrapper.className = this.component.cssNamespace.namespace
+			wrapper.classList.add(this.component.cssNamespace.namespace)
 		}
 
 		return wrapper
