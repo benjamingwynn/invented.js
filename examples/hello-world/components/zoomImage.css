@@ -1,0 +1,39 @@
+:root, :root > * {
+	display: block;
+}
+
+.container {
+	width: 600px;
+	overflow: hidden;
+	cursor: zoom-in;
+}
+
+img {
+	width: 100%;
+}
+
+.container img {
+	transform-origin: top left;
+	transition: transform 0.1s;
+}
+
+.zoom-amount {
+	font-size: 1em;
+	position: absolute;
+	font-family: sans-serif;
+	z-index: 2;
+	color: white;
+	background: rgba(0,0,0,0.7);
+	padding: 0.4em 1em;
+	transition: opacity 0.3s;
+	opacity: 1;
+	border-bottom-right-radius: 1em;
+}
+
+.zoom-amount::before {
+	content: "x";
+}
+
+.zoom-amount.hidden {
+	opacity: 0;
+}

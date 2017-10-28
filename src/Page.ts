@@ -5,6 +5,7 @@ import * as css from "css"
 import {Component, ComponentInstance} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
 import {CSSNamespace} from "./CSSNamespace"
+import {purgeString} from "./stringUtil"
 
 // Document is not a global.
 const document = null
@@ -65,6 +66,10 @@ export class Page {
 				// push it to an array too, so we can do Promise.all on it
 				componentBuildersArray.push(promise)
 
+				promise.catch(() => {
+					console.warn("Failed to construct a component!", componentName)
+				})
+
 				promise.then((component) => {
 					console.log("Constructed a new component, checking for JS", componentName)
 
@@ -123,7 +128,8 @@ export class Page {
 							if (node.selectors[i] === ":root") {
 								node.selectors[i] = `.${component.cssNamespace.namespace}`
 							} else {
-								node.selectors[i] = `.${component.cssNamespace.namespace} ${node.selectors[i]}`
+								// remove :root
+								node.selectors[i] = purgeString(`.${component.cssNamespace.namespace} ${node.selectors[i]}`, ":root ")
 							}
 						}
 					})

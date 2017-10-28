@@ -52,3 +52,21 @@ export function generateRandomHexString (characterCount:number = 16) : string {
 
 	return output
 }
+
+export function replaceAll (target:string, replaceThis:string|Array<string>, withThis:string) : string {
+	if (typeof replaceThis === "string") {
+		return target.split(replaceThis).join(withThis)
+	} else {
+		let output = ""
+
+		replaceThis.forEach((replaceThis2) => {
+			output = replaceAll(output, replaceThis2, withThis)
+		})
+
+		return output
+	}
+}
+
+export function purgeString (target:string, purgeThis:string|Array<string>) : string {
+	return replaceAll(target, purgeThis, "")
+}
