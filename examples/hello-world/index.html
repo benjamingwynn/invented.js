@@ -3,13 +3,17 @@
 	<head>
 		<meta charset="utf-8">
 		<title>My Sample Page</title>
+		<style>
+			body {
+				box-sizing: border-box;
+				margin: 0;
+			}
+		</style>
 	</head>
 
 	<body>
-		<h1>Example one:</h1>
-		<hello-world></hello-world>
-
-		<h1>Example two:</h1>
+		<h1>Basic form example</h1>
+		<p>Really basic example of isolated contextual Javascript</p>
 		<hello-world></hello-world>
 
 		<h1>slideshow</h1>
@@ -18,12 +22,32 @@
 		<slideshow>
 			<slide>
 				<h1>Hello World</h1>
-				<p>This is my first slide</p>
+				<p>This slideshow isn't ready for production use, but it works on Edge, Firefox, Chrome and IE11. It's a good example of nested components.</p>
 			</slide>
 
-			<slide background="https://photojournal.jpl.nasa.gov/jpeg/PIA20263.jpg">
+			<slide data-bg="https://photojournal.jpl.nasa.gov/jpeg/PIA20263.jpg">
 				<h1>Wow a photo!</h1>
 				<p>Ain't that neat.</p>
+			</slide>
+
+			<slide data-bg="https://photojournal.jpl.nasa.gov/jpeg/PIA22052.jpg">
+				<h1>This photo takes ages to load</h1>
+				<p>Especially on Edge and Firefox</p>
+			</slide>
+
+			<slide data-bg="https://photojournal.jpl.nasa.gov/jpeg/PIA22051.jpg">
+				<h1>Another photo</h1>
+				<p>This is a photo of something from NASA</p>
+				<p>I like using photos from NASA, they're high res.</p>
+			</slide>
+
+			<slide data-bg="https://photojournal.jpl.nasa.gov/jpeg/PIA21438.jpg">
+				<h2>Another test slide.</h2>
+			</slide>
+
+			<slide>
+				<h1>Last slide, folks</h1>
+				<p>Time to loop to the start, I think,</p>
 			</slide>
 		</slideshow>
 

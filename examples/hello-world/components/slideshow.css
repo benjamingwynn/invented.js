@@ -3,21 +3,36 @@
 	height: 600px;
 	width: 100%;
 	display: flex;
-	flex-flow: column-reverse nowrap;
+	flex-flow: column nowrap;
 	overflow: hidden;
+	box-sizing: border-box;
 }
 
 * {
 	color: white;
 }
 
+.slides, .background {
+	background-size: cover;
+	background-position: center;
+}
+
+.background {
+	display: flex;
+	width: inherit;
+	height: inherit;
+	position: absolute;
+	opacity: 0;
+	transition: opacity 0.5s;
+}
+
 .slides {
 	display: flex;
-	position: absolute;
 	z-index: 0;
 	width: inherit;
 	height: inherit;
 	margin-left: 0;
+	transition: margin 0.5s;
 	overflow: visible;
 }
 
@@ -25,13 +40,19 @@
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: center;
+	z-index: 2;
+	padding: 1em 0;
 }
 
-.page-dots > .page-dot {
+.page-dots > .dot {
 	background: white;
 	font-size: 1em;
 	width: 1em;
 	height: 1em;
 	border-radius: 50%;
 	margin: 0.3em;
+}
+
+.page-dots > .dot.active {
+	background: cyan;
 }
