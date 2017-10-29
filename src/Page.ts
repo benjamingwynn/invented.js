@@ -2,10 +2,12 @@ import * as fs from "fs"
 import * as jsdom from "jsdom"
 import * as css from "css"
 
-import {Component, ComponentInstance, UnknownComponent} from "./Component"
+import {Component, ComponentInstance} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
 import {CSSNamespace} from "./CSSNamespace"
 import {purgeString} from "./stringUtil"
+
+import {domMoveChilden} from "./domUtil"
 
 // Document is not a global.
 const document = null
@@ -179,6 +181,24 @@ export class Page {
 				if (nBuilt === nTotal) {
 					console.log("!!! Finished all promises for page building !!!")
 
+					// use <div> for registered custom elements and slots
+					while (true) { // lol
+						const oldElement:Element|null = document.querySelector("slot, [data-invented-name]:not(div)")
+
+						if (!oldElement) break
+
+						const newElement:Element = document.createElement("div")
+
+						// inherit attributes
+						for (let i = 0; i < oldElement.attributes.length; i += 1) {
+							newElement.setAttribute(oldElement.attributes[i].name, oldElement.attributes[i].value)
+						}
+
+						domMoveChilden(oldElement, newElement)
+
+						oldElement.outerHTML = newElement.outerHTML
+					}
+
 					document.querySelectorAll("[js-only]").forEach((node) => {
 						console.log("Found node which should only be shown when JS is enabled")
 						node.classList.add(noJSClass)
@@ -190,8 +210,6 @@ export class Page {
 				}
 			})
 		})
-
-		console.log("nTotal", nTotal)
 	}
 
 	public render () : string {

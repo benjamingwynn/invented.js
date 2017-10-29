@@ -1,4 +1,5 @@
 import {generateRandomHexString} from "./stringUtil"
+import {domMoveChilden} from "./domUtil"
 import {CSSNamespace} from "./CSSNamespace"
 
 import * as jsdom from "jsdom"
@@ -7,8 +8,8 @@ import * as css from "css"
 const document = null
 
 export class Component {
-	public dom:jsdom.JSDOM
-	public cssNamespace:CSSNamespace = new CSSNamespace()
+	public readonly dom:jsdom.JSDOM
+	public readonly cssNamespace:CSSNamespace = new CSSNamespace()
 
 	constructor (public tag:string, html:string, public css?:string, public js?:string) {
 		// Construct the DOM
@@ -18,67 +19,45 @@ export class Component {
 	}
 }
 
-export class UnknownComponent extends Component {
-	constructor (tag:string) {
-		console.log("Unknown type, using UnknownComponent for", tag)
-		super(tag, "<slot></slot>")
-	}
-}
-
-
 export class ComponentInstance {
-	public uid:string
-	public dom:jsdom.JSDOM
+	public readonly uid:string
+	// public readonly dom:jsdom.JSDOM
 
 	constructor (private node:HTMLUnknownElement, public component:Component) {
 		// Generate a unique ID for this component
 		this.uid = generateRandomHexString()
-		this.dom = new jsdom.JSDOM(component.dom.serialize()) // clone the DOM from the component
+		
+		const templateBody = new jsdom.JSDOM(component.dom.serialize()).window.document.body // clone the DOM from the component
 
-		const document = this.dom.window.document
+		// Create a temp space for holding the template components
+		const tempSpace = node.ownerDocument.createElement("div")
 
-		document.querySelectorAll("slot").forEach((slot:HTMLSlotElement) => {
-			const slotReplacement = document.createElement("div")
+		// Move children from template component copy to temp space
+		domMoveChilden(templateBody, tempSpace)
 
-			// inherit innerhtml
-			slotReplacement.innerHTML = node.innerHTML
+		const slot:Element|null = tempSpace.querySelector("slot")
 
-			// inherit attributes
-			for (let i = 0; i < slot.attributes.length; i += 1) {
-				slotReplacement.setAttribute(slot.attributes[i].name, slot.attributes[i].value)
-			}
-
-			// replace
-			slot.outerHTML = slotReplacement.outerHTML
-		})
-
-		// render the html and overwrite this node
-		node.outerHTML = this.renderHTML()
-
-		console.log(`Constructed a new ComponentInstance of type ${component.tag}, it has a UID of ${this.uid}.`)
-	}
-
-	// Create the wrapper
-	private render () : HTMLDivElement {
-		const document = this.dom.window.document
-		const wrapper = document.createElement("div")
-
-		wrapper.dataset.inventedName = this.component.tag
+		// If we have a slot, move all the current children to it
+		if (slot) {
+			domMoveChilden(node, slot)
+		}
+		
+		// Move everything from tempSpace to the actual node
+		domMoveChilden(tempSpace, node)
+		
+		// Add special attributes
+		node.dataset.inventedName = this.component.tag
 
 		if (this.component.js) {
-			wrapper.dataset.inventedId = this.uid
+			// used to target nodes with JS
+			node.dataset.inventedId = this.uid
 		}
-
-		wrapper.innerHTML = document.body.innerHTML
 
 		if (this.component.css) {
-			wrapper.classList.add(this.component.cssNamespace.namespace)
+			// used to target nodes with CSS
+			node.classList.add(this.component.cssNamespace.namespace)
 		}
 
-		return wrapper
-	}
-
-	private renderHTML () : string {
-		return this.render().outerHTML
+		console.log(`Constructed a new ComponentInstance of type ${component.tag}, it has a UID of ${this.uid}.`)
 	}
 }
