@@ -14,7 +14,7 @@ export class Component {
 		// Construct the DOM
 		this.dom = new jsdom.JSDOM(html)
 
-		console.log(`Constructed a new ${tag} Component, how exciting. This should only be called once per component type.`)
+		console.log(`>> Constructed a new ${tag} Component, how exciting. This should only be called once per component type.`)
 	}
 }
 

@@ -4,14 +4,21 @@
 	width: 100%;
 	display: flex;
 	flex-flow: column-reverse nowrap;
+	overflow: hidden;
+}
+
+* {
+	color: white;
 }
 
 .slides {
 	display: flex;
 	position: absolute;
-	z-index: -1;
+	z-index: 0;
 	width: inherit;
 	height: inherit;
+	margin-left: 0;
+	overflow: visible;
 }
 
 .page-dots {
