@@ -11,9 +11,24 @@ export class FilesystemComposer extends ComponentComposer {
 		super()
 	}
 
-	composeComponent (componentName:string) {
+	private generatePath (componentName:string) : string {
+		return this.workingDirectory + COMPONENT_DIRECTORY + kebabToCamelCase(componentName)
+	}
+
+	checkForComponent (componentName:string) : Promise <boolean> {
+		return new Promise <boolean> ((resolve, reject) => {
+			// TODO: support for .htm
+			fs.readFile(`${this.generatePath(componentName)}.html`, "utf-8", (error, html) => {
+				// TODO: maybe use stat/lstat instead of checking a read error?
+				resolve(!error)
+				// if (error) reject(error)
+			})
+		})
+	}
+
+	composeComponent (componentName:string) : Promise <Component> {
 		return new Promise <Component> ((resolve, reject) => {
-			const path = `${this.workingDirectory}${COMPONENT_DIRECTORY}${kebabToCamelCase(componentName)}`
+			const path = this.generatePath(componentName)
 
 			// TODO: support for .htm
 			fs.readFile(`${path}.html`, "utf-8", (error, html) => {
@@ -26,7 +41,7 @@ export class FilesystemComposer extends ComponentComposer {
 					new Promise <string> ((resolve, reject) => {
 						fs.readFile(`${path}.css`, "utf-8", (error, data) => {
 							if (error) {
-								console.warn(error)
+								// console.warn(error)
 								resolve("")
 							} else {
 								resolve(data)
@@ -38,7 +53,7 @@ export class FilesystemComposer extends ComponentComposer {
 					new Promise <string> ((resolve, reject) => {
 						fs.readFile(`${path}.js`, "utf-8", (error, data) => {
 							if (error) {
-								console.warn(error)
+								// console.warn(error)
 								resolve("")
 							} else {
 								resolve(data)

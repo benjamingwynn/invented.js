@@ -8,10 +8,7 @@ require("source-map-support").install()
 process.on("unhandledRejection", console.error)
 
 function buildTestHelloWorldPage () {
-	const page = new Page(fs.readFileSync("./examples/hello-world/index.html", "utf-8"), new FilesystemComposer("./examples/hello-world"))
-
-	// once the page is ready, write the page to build
-	page.ready.then(() => {
+	const page = new Page(fs.readFileSync("./examples/hello-world/index.html", "utf-8"), new FilesystemComposer("./examples/hello-world"), () => {
 		fs.writeFileSync("build/hello-world.html", page.render())
 	})
 }

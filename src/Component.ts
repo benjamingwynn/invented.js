@@ -14,9 +14,17 @@ export class Component {
 		// Construct the DOM
 		this.dom = new jsdom.JSDOM(html)
 
-		console.log(`Constructed a new ${tag} Component, how exciting. ${html}`)
+		console.log(`Constructed a new ${tag} Component, how exciting. This should only be called once per component type.`)
 	}
 }
+
+export class UnknownComponent extends Component {
+	constructor (tag:string) {
+		console.log("Unknown type, using UnknownComponent for", tag)
+		super(tag, "<slot></slot>")
+	}
+}
+
 
 export class ComponentInstance {
 	public uid:string

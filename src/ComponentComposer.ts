@@ -6,6 +6,7 @@ export abstract class ComponentComposer {
 		// ...
 	}
 
+	abstract checkForComponent (componentName:string) : Promise <boolean>
 	abstract composeComponent (componentName:string, existingHTML?:string) : Promise <Component>
 }
 

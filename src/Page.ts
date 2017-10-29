@@ -2,7 +2,7 @@ import * as fs from "fs"
 import * as jsdom from "jsdom"
 import * as css from "css"
 
-import {Component, ComponentInstance} from "./Component"
+import {Component, ComponentInstance, UnknownComponent} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
 import {CSSNamespace} from "./CSSNamespace"
 import {purgeString} from "./stringUtil"
@@ -21,7 +21,9 @@ export class Page {
 
 	public ready:Promise<Component[]>
 
-	private getDOMUnknowns (callback : (node:HTMLUnknownElement) => void) {
+	private getDOMUnknowns (callback : (node:HTMLUnknownElement) => void) : number {
+		let n:number = 0
+
 		this.dom.window.document.querySelectorAll("*").forEach((node:HTMLElement) => {
 			const isUnknown = node.toString() === "[object HTMLUnknownElement]"
 
@@ -29,18 +31,20 @@ export class Page {
 				return
 			}
 
+			n += 1
 			callback(node)
 		})
+
+		return n
 	}
 
-	constructor (html:string, composer:ComponentComposer) {
+	constructor (html:string, composer:ComponentComposer, callback:() => void) {
 		// Construct DOM
 		this.dom = new jsdom.JSDOM(html)
 		const document = this.dom.window.document
 
 		// Store the promises for the components
 		const componentBuilders:{[index:string] : Promise<Component>} = {}
-		const componentBuildersArray:Array<Promise<Component>> = []
 
 		let loadedContextJS:boolean
 
@@ -51,24 +55,31 @@ export class Page {
 		style.id = "invented-hide-nojs-stylesheet"
 		document.head.appendChild(style)
 
+		let nBuilt = 0
+
 		// Iterate through components looking for unknown elements
-		this.getDOMUnknowns((node) => { // heads up, this is a loop - it's syncronous
+		const nTotal = this.getDOMUnknowns(async (node) => {
 
 			// I don't know what element this is, so construct its component
-			const componentName = node.tagName.toLowerCase()
+			const componentName:string = node.tagName.toLowerCase()
 
-			// Construct the component if it isn't already under construction/finished construction
+			const componentExists = await composer.checkForComponent(componentName)
+
+			if (componentExists) {
+				console.log("The component exists, so that's good.", componentName)
+			} else {
+				console.warn("Your composer does not have the component requested:", componentName)
+				nBuilt += 1
+				return
+			}
+
 			if (!componentBuilders[componentName]) {
+				console.log("Requesting component construction for", componentName)
+
 				// Request the component be built
 				const promise:Promise<Component> = composer.composeComponent(componentName, node.innerHTML)
 
 				componentBuilders[componentName] = promise
-				// push it to an array too, so we can do Promise.all on it
-				componentBuildersArray.push(promise)
-
-				promise.catch(() => {
-					console.warn("Failed to construct a component!", componentName)
-				})
 
 				promise.then((component) => {
 					console.log("Constructed a new component, checking for JS", componentName)
@@ -134,7 +145,7 @@ export class Page {
 						}
 					})
 
-					console.log(cssTree.stylesheet.rules)
+					// console.log(cssTree.stylesheet.rules)
 
 					// add CSS to the DOM
 					const style = document.createElement("style")
@@ -154,25 +165,33 @@ export class Page {
 				this.componentInstances.push(componentInstance)
 
 				if (component.js) {
-					console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
+					// console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
 
 					const script = document.createElement("script")
 					script.innerHTML = `window._inventedComponents["${component.tag}"](new _inventedContext("${componentInstance.uid}"))`
 					document.body.appendChild(script)
 				}
-			})
 
+				nBuilt += 1
+
+				console.log("nBuilt", nBuilt)
+
+				if (nBuilt === nTotal) {
+					console.log("!!! Finished all promises for page building !!!")
+
+					document.querySelectorAll("[js-only]").forEach((node) => {
+						console.log("Found node which should only be shown when JS is enabled")
+						node.classList.add(noJSClass)
+					})
+
+					if (callback) {
+						callback()
+					}
+				}
+			})
 		})
 
-		// Once all of the components are built, fire the callback
-		this.ready = Promise.all(componentBuildersArray)
-
-		this.ready.then(() => {
-			document.querySelectorAll("[js-only]").forEach((node) => {
-				console.log("Found node which should only be shown when JS is enabled")
-				node.classList.add(noJSClass)
-			})
-		})
+		console.log("nTotal", nTotal)
 	}
 
 	public render () : string {
