@@ -12,7 +12,9 @@ There is no attribute binding, there is no common event message pipe, there are 
 
 ### Browser Compatibility
 
-(TODO)
+Invented should be compatible with any browser, however, Javascript functionality will only work for browsers with support for `querySelector` and `querySelectorAll`
+
+(TODO - what browsers support these)
 
 ### Performance
 
@@ -46,57 +48,40 @@ Only use one `<slot>` per component, as mutliple `<slot>` tags are currently ign
 
 #### js-only
 
-An attribute that specifies that an element should only be visible if the client has Javascript enabled, and has loaded the components Javascript (if it has any) successfully.
+An attribute that specifies that an element should only be visible if the client has Javascript enabled, and has loaded the components Javascript (if it has any) successfully. This is basically the opposite of a `<noscript>` tag.
 
 **Example**
 
 `<h1 js-only>Javascript is enabled!</h1>`
 
-#### nojs-only
-
-(Not yet implemented - but planned short term) Opposite of js-only.
-
-`<h1 nojs-only>Javascript is disabled!</h1>`
-
-#### Example
-
-An example of a components markup and a sample page would look like so:
-
-spin-this.html
-
-```
-	<slot class="spin-stuff"></slot>
-	<button class="spin-button" type="button" js-only>Spin</button>
-```
-
-input page
-```
-	<spin-this>
-		<h1>Is that a spin button?</h1>
-	</spin-this>
-```
-
-output page
-```
-	<div invented-component-name="spin-this">
-		<div class="spin-stuff">
-			<h1>Is that a spin button?</h1>
-		</div>
-		<button class="spin-button" type="button" js-only></button>
-	</div>
-```
-
 ### Styling
 
-(TODO: How `:root` works, how everything is scoped)
+Any component can have styling, everything defined in a components style is scoped to it's component. A component cannot affect any styles outside of itself.
+
+Like web components in the web components v1 specification, `:root` can be used to target the component itself.
 
 ### Javascript
 
-(TODO: How Context works, using Context)
+Like component styling, component Javascript is scoped to the component and cannot affect the page. Access to `document` is limited, and a special `context` global is provided instead.
+
+#### Document limitations
+
+The `document` object is limited. Functions for finding elements such as `document.querySelector` and `document.getElementById` will not work if you try and use them. However, functions such as `document.createElement` are allowed as they do not affect the document.
+
+#### Context API
+
+`context` is accessible anywhere in your components script.
+
+> ⚠️ Heads up! The context API is likely to change in the future.
+
+`context.getElement(<string> query)` gets a single element in the component via a query selector
+`context.getElements(<string> query)` gets an array of matching elements in the component via a query selector
+
+> More API to come!
 
 ## Building your page
 
-As previously mentioned, Invented is easy to learn. 
+Once you have your components, you can build pages out of the components either via the command line or programatically.
 
 ### CLI
 
@@ -107,6 +92,8 @@ As previously mentioned, Invented is easy to learn.
 Install invented with NPM or Yarn.
 
 `npm install --save invented` or `yarn add invented`
+
+(TODO - using the API in Typescript and vanilla JS)
 
 ## Building Invented
 
