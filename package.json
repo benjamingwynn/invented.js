@@ -2,8 +2,10 @@
   "name": "invented",
   "version": "0.0.1",
   "description": "A tiny library to compose reusable web components using SSR and Progressive Enchancement.",
-  "main": ".",
+  "main": "./dist/Page.js",
+  "types": "./dist/Page.d.ts",
   "scripts": {
+    "prepublishOnly": "tsc -p ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Benjamin Gwynn <xenxier@xenxier.com>",

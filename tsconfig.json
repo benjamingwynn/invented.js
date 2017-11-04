@@ -5,8 +5,9 @@
 		// "sourceMap": true,
 		"baseUrl": "src",
 		"noImplicitAny": true,
-		"outDir": "build", // output directory to build
+		"outDir": "dist",
 		"strict": true,
+		"declaration": true,
 		"inlineSourceMap": true
 	}
 }
