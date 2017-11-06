@@ -15,7 +15,7 @@ export class FilesystemComposer extends ComponentComposer {
 		return this.workingDirectory + COMPONENT_DIRECTORY + kebabToCamelCase(componentName)
 	}
 
-	checkForComponent (componentName:string) : Promise <boolean> {
+	public checkForComponent (componentName:string) : Promise <boolean> {
 		return new Promise <boolean> ((resolve, reject) => {
 			// TODO: support for .htm
 			fs.readFile(`${this.generatePath(componentName)}.html`, "utf-8", (error, html) => {
@@ -26,7 +26,7 @@ export class FilesystemComposer extends ComponentComposer {
 		})
 	}
 
-	composeComponent (componentName:string) : Promise <Component> {
+	public composeComponent (componentName:string) : Promise <Component> {
 		return new Promise <Component> ((resolve, reject) => {
 			const path = this.generatePath(componentName)
 

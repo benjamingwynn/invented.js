@@ -1,9 +1,9 @@
 {
   "name": "invented",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A tiny library to compose reusable web components using SSR and Progressive Enchancement.",
-  "main": "./dist/Page.js",
-  "types": "./dist/Page.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepublishOnly": "tsc -p ./",
     "test": "echo \"Error: no test specified\" && exit 1"

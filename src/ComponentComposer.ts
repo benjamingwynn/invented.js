@@ -6,8 +6,8 @@ export abstract class ComponentComposer {
 		// ...
 	}
 
-	abstract checkForComponent (componentName:string) : Promise <boolean>
-	abstract composeComponent (componentName:string, existingHTML?:string) : Promise <Component>
+	public abstract checkForComponent (componentName:string) : Promise <boolean>
+	public abstract composeComponent (componentName:string, existingHTML?:string) : Promise <Component>
 }
 
 // A sample composer that can only compose hard-coded test components

@@ -1,5 +1,6 @@
 import * as fs from "fs"
 
+import {ComponentComposer} from "./ComponentComposer"
 import {FilesystemComposer} from "./filesystemComposer"
 import {Page} from "./Page"
 
@@ -7,10 +8,12 @@ import {Page} from "./Page"
 require("source-map-support").install()
 process.on("unhandledRejection", console.error)
 
-function buildTestHelloWorldPage () {
-	const page = new Page(fs.readFileSync("./examples/hello-world/index.html", "utf-8"), new FilesystemComposer("./examples/hello-world"), () => {
-		fs.writeFileSync("build/hello-world.html", page.render())
-	})
-}
+export {Page, FilesystemComposer, ComponentComposer}
 
-buildTestHelloWorldPage()
+// function buildTestHelloWorldPage () {
+// 	const page = new Page(fs.readFileSync("./examples/hello-world/index.html", "utf-8"), new FilesystemComposer("./examples/hello-world"), () => {
+// 		fs.writeFileSync("build/hello-world.html", page.render())
+// 	})
+// }
+
+// buildTestHelloWorldPage()
