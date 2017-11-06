@@ -13,7 +13,7 @@ import {domMoveChilden} from "./domUtil"
 const document = null
 
 // load the built context to inject
-const CONTEXT_JS = fs.readFileSync("./lib/Context.js").toString()
+const CONTEXT_JS = fs.readFileSync(`${__dirname}/../lib/Context.js`).toString()
 
 const noJSClass = new CSSNamespace().namespace
 
