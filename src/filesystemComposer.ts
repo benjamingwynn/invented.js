@@ -3,8 +3,6 @@ import {Component} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
 import {kebabToCamelCase} from "./stringUtil"
 
-const COMPONENT_DIRECTORY = "/components/"
-
 /** Compose components from the filesystem */
 export class FilesystemComposer extends ComponentComposer {
 	constructor (public workingDirectory:string) {
@@ -12,7 +10,7 @@ export class FilesystemComposer extends ComponentComposer {
 	}
 
 	private generatePath (componentName:string) : string {
-		return this.workingDirectory + COMPONENT_DIRECTORY + kebabToCamelCase(componentName)
+		return this.workingDirectory + kebabToCamelCase(componentName)
 	}
 
 	public checkForComponent (componentName:string) : Promise <boolean> {

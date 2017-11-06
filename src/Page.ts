@@ -18,13 +18,15 @@ const CONTEXT_JS = fs.readFileSync(`${__dirname}/../lib/Context.js`).toString()
 const noJSClass = new CSSNamespace().namespace
 
 export class Page {
-	private dom:jsdom.JSDOM
+	public dom:jsdom.JSDOM
 	private componentInstances:Array<ComponentInstance> = []
 
 	public ready:Promise<Component[]>
 
 	private getDOMUnknowns (callback : (node:HTMLUnknownElement) => void) : number {
 		let n:number = 0
+
+		console.log("Finding unknown objects...")
 
 		this.dom.window.document.querySelectorAll("*").forEach((node:HTMLElement) => {
 			const isUnknown = node.toString() === "[object HTMLUnknownElement]"
@@ -33,17 +35,23 @@ export class Page {
 				return
 			}
 
+			console.log("Found unknown - unknown no.", n)
+
 			n += 1
 			callback(node)
 		})
 
+		console.log("Total", n, "unknown DOMobjects")
+
 		return n
 	}
 
-	constructor (html:string, composer:ComponentComposer, callback:() => void) {
+	constructor (html:string, composer:ComponentComposer, callback:(constructedPage:Page) => void) {
 		// Construct DOM
 		this.dom = new jsdom.JSDOM(html)
 		const document = this.dom.window.document
+
+		const that = this
 
 		// Store the promises for the components
 		const componentBuilders:{[index:string] : Promise<Component>} = {}
@@ -59,8 +67,42 @@ export class Page {
 
 		let nBuilt = 0
 
+		console.log("Injected CSS")
+
+		function finishedBuilding () {
+			console.log("!!! Finished all promises for page building !!!")
+
+			// use <div> for registered custom elements and slots
+			while (true) { // lol
+				const oldElement:Element|null = document.querySelector("slot, [data-invented-name]:not(div)")
+
+				if (!oldElement) break
+
+				const newElement:Element = document.createElement("div")
+
+				// inherit attributes
+				for (let i = 0; i < oldElement.attributes.length; i += 1) {
+					newElement.setAttribute(oldElement.attributes[i].name, oldElement.attributes[i].value)
+				}
+
+				domMoveChilden(oldElement, newElement)
+
+				oldElement.outerHTML = newElement.outerHTML
+			}
+
+			document.querySelectorAll("[js-only]").forEach((node) => {
+				console.log("Found node which should only be shown when JS is enabled")
+				node.classList.add(noJSClass)
+			})
+
+			if (callback) {
+				callback(that)
+			}
+		}
+
 		// Iterate through components looking for unknown elements
 		const nTotal = this.getDOMUnknowns(async (node) => {
+			console.log("Constructing component...")
 
 			// I don't know what element this is, so construct its component
 			const componentName:string = node.tagName.toLowerCase()
@@ -71,7 +113,11 @@ export class Page {
 				console.log("The component exists, so that's good.", componentName)
 			} else {
 				console.warn("Your composer does not have the component requested:", componentName)
+
 				nBuilt += 1
+
+				if (nBuilt === nTotal) finishedBuilding()
+
 				return
 			}
 
@@ -105,7 +151,7 @@ export class Page {
 					}
 
 					const script = document.createElement("script")
-					script.innerHTML = `window._inventedComponents["${componentName}"] = function (context, document) {${component.js}}`
+					script.innerHTML = `window._inventedComponents["${componentName}"] = function (context) {${component.js}}`
 					document.body.appendChild(script)
 				})
 
@@ -170,7 +216,7 @@ export class Page {
 					// console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
 
 					const script = document.createElement("script")
-					script.innerHTML = `window._inventedComponents["${component.tag}"](new _inventedContext("${componentInstance.uid}"), _inventedLimitedDocument)`
+					script.innerHTML = `window._inventedComponents["${component.tag}"](new _inventedContext("${componentInstance.uid}"))`
 					document.body.appendChild(script)
 				}
 
@@ -179,37 +225,15 @@ export class Page {
 				console.log("nBuilt", nBuilt)
 
 				if (nBuilt === nTotal) {
-					console.log("!!! Finished all promises for page building !!!")
-
-					// use <div> for registered custom elements and slots
-					while (true) { // lol
-						const oldElement:Element|null = document.querySelector("slot, [data-invented-name]:not(div)")
-
-						if (!oldElement) break
-
-						const newElement:Element = document.createElement("div")
-
-						// inherit attributes
-						for (let i = 0; i < oldElement.attributes.length; i += 1) {
-							newElement.setAttribute(oldElement.attributes[i].name, oldElement.attributes[i].value)
-						}
-
-						domMoveChilden(oldElement, newElement)
-
-						oldElement.outerHTML = newElement.outerHTML
-					}
-
-					document.querySelectorAll("[js-only]").forEach((node) => {
-						console.log("Found node which should only be shown when JS is enabled")
-						node.classList.add(noJSClass)
-					})
-
-					if (callback) {
-						callback()
-					}
+					finishedBuilding()
 				}
 			})
 		})
+
+		// If there are no components then the above logic will never fire, which is lame, so fire it manually
+		if (nTotal === 0) {
+			finishedBuilding()
+		}
 	}
 
 	public render () : string {
