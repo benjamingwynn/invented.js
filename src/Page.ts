@@ -6,6 +6,7 @@ import {Component, ComponentInstance} from "./Component"
 import {ComponentComposer} from "./ComponentComposer"
 import {CSSNamespace} from "./CSSNamespace"
 import {purgeString} from "./stringUtil"
+import {isolateCSS} from "./isolateCSS"
 
 import {domMoveChilden} from "./domUtil"
 
@@ -28,7 +29,8 @@ export class Page {
 
 		console.log("Finding unknown objects...")
 
-		this.dom.window.document.querySelectorAll("*").forEach((node:HTMLElement) => {
+		// HACK: there must be a better way to do this
+		this.dom.window.document.querySelectorAll("*").forEach((node:any) => { // node:HTMLElement
 			const isUnknown = node.toString() === "[object HTMLUnknownElement]"
 
 			if (!isUnknown) {
@@ -163,44 +165,18 @@ export class Page {
 						return
 					}
 
-					// add CSS if it exists
+					const isolated:string|null = isolateCSS(component.cssNamespace, component.css)
 
-					const cssTree = css.parse(component.css)
+					if (!isolated) {
+						console.warn("The component", component.tag, "doesn't seem to have any CSS")
 
-					// look for css rules
-					const elementStyles = []
-
-					if (!cssTree.stylesheet || !cssTree.stylesheet.rules) {
-						console.warn("CSS appears to not have any valid rules.")
 						return
 					}
-
-					cssTree.stylesheet.rules.forEach((node:css.Rule) => {
-						if (node.type !== "rule") return
-
-						if (!node.selectors) {
-							console.warn("Weird. node.selectors isn't defined")
-							return
-						}
-
-						for (var i = 0; i < node.selectors.length; i += 1) {
-							if (node.selectors[i] === ":root") {
-								node.selectors[i] = `.${component.cssNamespace.namespace}`
-							} else {
-								// remove :root
-								node.selectors[i] = purgeString(`.${component.cssNamespace.namespace} ${node.selectors[i]}`, ":root ")
-							}
-						}
-					})
-
-					// console.log(cssTree.stylesheet.rules)
 
 					// add CSS to the DOM
 					const style = document.createElement("style")
 
-					style.innerHTML = css.stringify(cssTree)
-
-					// TODO: Scoped animations
+					style.innerHTML = isolated
 
 					document.body.appendChild(style)
 				})
