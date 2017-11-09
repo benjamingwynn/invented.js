@@ -1,6 +1,6 @@
 {
   "name": "invented",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "A tiny library to compose reusable web components using SSR and Progressive Enchancement.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

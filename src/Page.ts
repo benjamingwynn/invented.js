@@ -29,14 +29,10 @@ export class Page {
 
 		console.log("Finding unknown objects...")
 
-		// HACK: there must be a better way to do this
-		this.dom.window.document.querySelectorAll("*").forEach((node:any) => { // node:HTMLElement
-			const isUnknown = node.toString() === "[object HTMLUnknownElement]"
-
-			if (!isUnknown) {
-				return
-			}
-
+		/*
+			Any element which isn't a default HTML element
+		*/
+		this.dom.window.document.querySelectorAll("*:not(html):not(head):not(link):not(meta):not(base):not(script):not(style):not(title):not(body):not(address):not(article):not(aside):not(footer):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(header):not(hgroup):not(nav):not(section):not(blockquote):not(cite):not(dd):not(dl):not(div):not(dt):not(figcaption):not(figure):not(hr):not(li):not(ol):not(ul):not(menu):not(main):not(p):not(pre):not(a):not(abbr):not(b):not(bdi):not(bdo):not(br):not(code):not(data):not(time):not(dfn):not(em):not(i):not(kbd):not(mark):not(q):not(rp):not(ruby):not(rt):not(rtc):not(rb):not(s):not(del):not(ins):not(samp):not(small):not(span):not(strong):not(sub):not(sup):not(u):not(var):not(wbr):not(area):not(map):not(audio):not(source):not(img):not(track):not(video):not(embed):not(object):not(param):not(picture):not(canvas):not(noscript):not(caption):not(table):not(col):not(colgroup):not(tbody):not(tr):not(td):not(tfoot):not(th):not(thead):not(button):not(datalist):not(option):not(fieldset):not(label):not(form):not(input):not(legend):not(meter):not(optgroup):not(select):not(output):not(progress):not(textarea):not(details):not(dialog):not(menuitem):not(summary):not(content):not(slot):not(element):not(shadow):not(template):not(acronym):not(applet):not(basefont):not(font):not(big):not(blink):not(center):not(command):not(dir):not(frame):not(frameset):not(image):not(isindex):not(keygen):not(listing):not(marquee):not(multicol):not(nextid):not(noembed):not(plaintext):not(spacer):not(strike):not(tt):not(xmp)").forEach((node:any) => {
 			console.log("Found unknown - unknown no.", n)
 
 			n += 1
