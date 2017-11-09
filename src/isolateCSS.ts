@@ -25,11 +25,14 @@ export function isolateCSS (namespace:CSSNamespace, stylesheet:string) : string 
 		}
 
 		for (var i = 0; i < node.selectors.length; i += 1) {
-			if (node.selectors[i] === ":root") {
-				node.selectors[i] = `.${namespace.namespace}`
-			} else {
-				// remove :root
-				node.selectors[i] = purgeString(`.${namespace.namespace} ${node.selectors[i]}`, ":root ")
+			if (node.selectors[i].indexOf(":root") === 0) {
+				// if it has a space after it, remove it
+				if (node.selectors[i].indexOf(":root ") === 0) {
+					node.selectors[i] = purgeString(`.${namespace.namespace} ${node.selectors[i]}`, ":root ")
+				} else { // otherwise, it is a modifier to the root element
+
+					node.selectors[i] = node.selectors[i].replace(":root", `.${namespace.namespace}`)
+				}
 			}
 		}
 	})
