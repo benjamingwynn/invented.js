@@ -10,7 +10,7 @@ import ComponentManifest from "./ComponentManifest"
 import {ComponentManifestRetriever} from "./ComponentManifestRetriever"
 import {ComponentManifestHandler} from "./ComponentManifestHandler"
 
-import {domMoveChilden} from "./domUtil"
+import {domMoveChilden, copyDOMAttributes} from "./domUtil"
 
 // Document is not a global.
 const document = null
@@ -78,24 +78,39 @@ export class Page {
 
 				if (!oldElement) break
 
+				oldElement.removeAttribute("invented-slot")
+
 				console.log(oldElement.tagName)
-				const newElement:Element = document.createElement(oldElement.tagName === "INVENTED" ? "div" : oldElement.tagName)
+				// const newElement:Element = document.createElement("div")
+				const newElement:Element = document.createElement(oldElement.tagName === "INVENTED" ? "DIV" : oldElement.tagName)
 
 				// inherit attributes
-				for (let i = 0; i < oldElement.attributes.length; i += 1) {
-					newElement.setAttribute(oldElement.attributes[i].name, oldElement.attributes[i].value)
-				}
+				copyDOMAttributes(oldElement, newElement)
 
 				domMoveChilden(oldElement, newElement)
 
 				oldElement.outerHTML = newElement.outerHTML
-
-				oldElement.removeAttribute("invented-slot")
 			}
 
 			document.querySelectorAll("[invented-jsonly]").forEach((node) => {
 				console.log("Found node which should only be shown when JS is enabled")
 				node.classList.add(noJSClass)
+			})
+
+			// handle custom root declarations
+			document.querySelectorAll("[invented-root]").forEach((node) => {
+				if (node.parentElement) {
+					node.removeAttribute("invented-root")
+
+					// copy all of the attributes from the nodes parent to the node
+					copyDOMAttributes(node.parentElement, node, true)
+
+					// set the node parent outer html to the nodes outer html
+					node.parentElement.outerHTML = node.outerHTML
+				} else {
+					throw new Error("Weird. No parentElement found on an [invented-root] node. Are you using the invented-root correctly?")
+				}
+
 			})
 
 			if (callback) {
@@ -146,7 +161,7 @@ export class Page {
 					console.log("Constructed a new component, checking for JS", componentName)
 
 					if (!component.js) {
-						console.warn("The component", component.tag, "doesn't seem to have any Javascript")
+						console.warn("The component", component.name, "doesn't seem to have any Javascript")
 						return
 					}
 
@@ -172,14 +187,14 @@ export class Page {
 					console.log("Constructed a new component, checking for CSS", componentName)
 
 					if (!component.css) {
-						console.warn("The component", component.tag, "doesn't seem to have any CSS")
+						console.warn("The component", component.name, "doesn't seem to have any CSS")
 						return
 					}
 
 					const isolated:string|null = isolateCSS(component.cssNamespace, component.css)
 
 					if (!isolated) {
-						console.warn("The component", component.tag, "doesn't seem to have any CSS")
+						console.warn("The component", component.name, "doesn't seem to have any CSS")
 
 						return
 					}
@@ -203,7 +218,7 @@ export class Page {
 					// console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
 
 					const script = document.createElement("script")
-					script.innerHTML = `window._inventedComponents["${component.tag}"](new _inventedContext("${componentInstance.uid}"))`
+					script.innerHTML = `window._inventedComponents["${component.name}"](new _inventedContext("${componentInstance.uid}"))`
 					document.body.appendChild(script)
 				}
 

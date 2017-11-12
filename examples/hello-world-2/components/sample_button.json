@@ -1,0 +1,9 @@
+{
+	"meta": {
+		"name": "Sample Button"
+	},
+
+	"code": {
+		"html": ["./button.html"]
+	}
+}
