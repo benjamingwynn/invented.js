@@ -1,6 +1,6 @@
 import {Component} from "./Component"
 
-export abstract class ComponentComposer {
+export default abstract class ComponentComposer {
 	constructor () {
 		console.log("A component was constructed")
 		// ...

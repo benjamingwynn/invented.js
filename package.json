@@ -12,10 +12,12 @@
   "license": "GPL-3.0",
   "dependencies": {
     "css": "^2.2.1",
+    "fs-extra": "^4.0.2",
     "jsdom": "^11.3.0",
     "source-map-support": "^0.5.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^4.0.4",
     "@types/css": "^0.0.30",
     "@types/jsdom": "^11.0.3",
     "@types/node": "^8.0.50",

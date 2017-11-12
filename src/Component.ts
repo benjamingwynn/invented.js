@@ -8,13 +8,10 @@ import * as css from "css"
 const document = null
 
 export class Component {
-	public readonly dom:jsdom.JSDOM
 	public readonly cssNamespace:CSSNamespace = new CSSNamespace()
 
-	constructor (public tag:string, html:string, public css?:string, public js?:string) {
+	constructor (public tag:string, public readonly dom:jsdom.JSDOM, public css?:string, public js?:string) {
 		// Construct the DOM
-		this.dom = new jsdom.JSDOM(html)
-
 		console.log(`>> Constructed a new ${tag} Component, how exciting. This should only be called once per component type.`)
 	}
 }
@@ -26,7 +23,7 @@ export class ComponentInstance {
 	constructor (private node:HTMLUnknownElement, public component:Component) {
 		// Generate a unique ID for this component
 		this.uid = generateRandomHexString()
-		
+
 		const templateBody = new jsdom.JSDOM(component.dom.serialize()).window.document.body // clone the DOM from the component
 
 		// Create a temp space for holding the template components
@@ -41,10 +38,10 @@ export class ComponentInstance {
 		if (slot) {
 			domMoveChilden(node, slot)
 		}
-		
+
 		// Move everything from tempSpace to the actual node
 		domMoveChilden(tempSpace, node)
-		
+
 		// Add special attributes
 		node.dataset.inventedName = this.component.tag
 

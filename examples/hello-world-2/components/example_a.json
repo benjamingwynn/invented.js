@@ -1,0 +1,9 @@
+{
+	"meta": {
+		"name": "Example A"
+	},
+
+	"code": {
+		"html": ["./example.html"]
+	}
+}
