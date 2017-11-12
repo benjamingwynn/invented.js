@@ -72,13 +72,14 @@ export class Page {
 		function finishedBuilding () {
 			console.log("!!! Finished all promises for page building !!!")
 
-			// use <div> for registered custom elements and slots
+			// inherit
 			while (true) { // lol
-				const oldElement:Element|null = document.querySelector("slot, [data-invented-name]:not(div)")
+				const oldElement:Element|null = document.querySelector("[invented-slot], [data-invented-name]:not(div)")
 
 				if (!oldElement) break
 
-				const newElement:Element = document.createElement("div")
+				console.log(oldElement.tagName)
+				const newElement:Element = document.createElement(oldElement.tagName === "INVENTED" ? "div" : oldElement.tagName)
 
 				// inherit attributes
 				for (let i = 0; i < oldElement.attributes.length; i += 1) {
@@ -88,9 +89,11 @@ export class Page {
 				domMoveChilden(oldElement, newElement)
 
 				oldElement.outerHTML = newElement.outerHTML
+
+				oldElement.removeAttribute("invented-slot")
 			}
 
-			document.querySelectorAll("[js-only]").forEach((node) => {
+			document.querySelectorAll("[invented-jsonly]").forEach((node) => {
 				console.log("Found node which should only be shown when JS is enabled")
 				node.classList.add(noJSClass)
 			})
