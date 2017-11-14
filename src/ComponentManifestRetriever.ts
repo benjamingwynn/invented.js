@@ -11,13 +11,14 @@ export abstract class ComponentManifestRetriever {
 
 //}
 
+/** Get the manifest from the filesystem */
 export class ComponentManifestRetrieverFS extends ComponentManifestRetriever {
 	constructor (private workingDirectory:string) {
 		super()
 	}
 
 	private generatePath (componentName:string) : string {
-		return this.workingDirectory + componentName + ".json"
+		return this.workingDirectory + componentName + "/index.json"
 	}
 
 	doesManifestExist (componentName:string) : Promise <boolean> {
@@ -27,8 +28,19 @@ export class ComponentManifestRetrieverFS extends ComponentManifestRetriever {
 	}
 
 	getManifest (componentName:string) : Promise <ComponentManifest> {
-		return new Promise(async (resolve) => {
-			resolve(await fs.readJSON(this.generatePath(componentName)))
+		return new Promise(async (resolve, reject) => {
+			const json = await fs.readJSON(this.generatePath(componentName))
+
+			// safety
+			if (!json.code) reject("no code object")
+			if (!json.code.html) reject("no code.html")
+
+			// string to array
+			if (typeof json.code.html === "string") json.code.html = [json.code.html]
+			if (typeof json.code.css === "string") json.code.css = [json.code.css]
+			if (typeof json.code.js === "string") json.code.js = [json.code.js]
+
+			resolve(json)
 		})
 	}
 }

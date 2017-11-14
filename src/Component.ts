@@ -31,7 +31,7 @@ export class ComponentInstance {
 	public readonly uid:string
 	// public readonly dom:jsdom.JSDOM
 
-	constructor (private node:HTMLUnknownElement, public component:Component) {
+	constructor (private node:HTMLElement, public component:Component) {
 		// Get the attributes from the component
 		const attributes:AttributeMap = domAttributesToMap(node)
 
@@ -53,7 +53,7 @@ export class ComponentInstance {
 		// Move children from template component copy to temp space
 		domMoveChilden(templateBody, tempSpace)
 
-		const slot:Element|null = tempSpace.querySelector("[invented-slot]")
+		const slot:Element|null = tempSpace.querySelector("[invention-slot]")
 
 		// If we have a slot, move all the current children to it
 		if (slot) {
