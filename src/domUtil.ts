@@ -25,8 +25,16 @@ export function domAttributesToMap ($0:HTMLElement) : AttributeMap {
 
 export function copyDOMAttributes (oldElement:Element, newElement:Element, onlyCopyNew?:boolean) {
 	for (let i = 0; i < oldElement.attributes.length; i += 1) {
-		if (!onlyCopyNew || !newElement.hasAttribute(oldElement.attributes[i].name) ) {
-			newElement.setAttribute(oldElement.attributes[i].name, oldElement.attributes[i].value)
+		const name = oldElement.attributes[i].name
+		const value = oldElement.attributes[i].value
+
+		const hasAttr = newElement.hasAttribute(name)
+
+		console.log("hasAttr", name, hasAttr, "| onlyCopyNew", onlyCopyNew)
+
+		if (!onlyCopyNew || (onlyCopyNew && !hasAttr)) {
+			console.log("copying")
+			newElement.setAttribute(name, value)
 		}
 	}
 }
