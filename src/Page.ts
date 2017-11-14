@@ -213,7 +213,7 @@ export class Page {
 						}
 
 						const script = document.createElement("script")
-						script.innerHTML = `window._inventedComponents["${componentName}"] = function (context) {${component.js}}`
+						script.innerHTML = `window._inventedComponents["${componentName}"] = function ($invention) {${component.js}}`
 						document.body.appendChild(script)
 					})
 
@@ -252,7 +252,7 @@ export class Page {
 						// console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
 
 						const script = document.createElement("script")
-						script.innerHTML = `window._inventedComponents["${component.name}"](new _inventedContext("${componentInstance.uid}"))`
+						script.innerHTML = `window._inventedComponents["${component.name}"](document.querySelector("[data-invented-id='${componentInstance.uid}']"))`
 						document.body.appendChild(script)
 					}
 
