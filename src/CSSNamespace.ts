@@ -9,7 +9,7 @@ export class CSSNamespace {
 		let ns:string = ""
 
 		while (!ns || usedCSSNamespaces[ns]) {
-			ns = generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter()
+			ns = generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter() + generateRandomAlphabeticalCharacter()
 		}
 
 		this.namespace = ns.toLowerCase()
