@@ -1,5 +1,5 @@
-import {ComponentComposer} from "./ComponentComposer"
-import {FilesystemComposer} from "./filesystemComposer"
+import {ComponentManifestHandlerFS} from "./ComponentManifestHandler"
+import {ComponentManifestRetrieverFS} from "./ComponentManifestRetriever"
 import {Page} from "./Page"
 import {CSSNamespace} from "./CSSNamespace"
 import {isolateCSS} from "./isolateCSS"
@@ -8,4 +8,4 @@ import {isolateCSS} from "./isolateCSS"
 require("source-map-support").install()
 process.on("unhandledRejection", console.error)
 
-export {Page, FilesystemComposer, ComponentComposer, CSSNamespace, isolateCSS}
+export {Page, ComponentManifestHandlerFS, ComponentManifestRetrieverFS, CSSNamespace, isolateCSS}
