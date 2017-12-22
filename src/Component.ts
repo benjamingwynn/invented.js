@@ -74,7 +74,8 @@ export class ComponentInstance {
 
 		if (this.component.css) {
 			// used to target nodes with CSS
-			node.classList.add(this.component.cssNamespace.namespace)
+			// node.classList.add(this.component.cssNamespace.namespace)
+			node.className += " " + this.component.cssNamespace.namespace
 		}
 
 		console.log(`Constructed a new ComponentInstance of type ${component.name}, it has a UID of ${this.uid}.`)

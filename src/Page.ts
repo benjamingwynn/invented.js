@@ -132,8 +132,16 @@ export class Page {
 					copyDOMAttributes(parent, node, true)
 					console.log(node.outerHTML)
 
+					// create the concatenated class string
+					const realClass:string = parent.className + " " + node.className
+
+					// set the class name as the concatenated class string
+					parent.className = realClass.trim()
+					node.className = realClass.trim()
+
 					// set the node parent outer html to the nodes outer html
 					parent.outerHTML = node.outerHTML
+					console.log("New class name is ", realClass)
 				} else {
 					throw new Error("Weird. No parentElement found on an [invention-root] node. Are you using the invention-root attribute correctly?")
 				}
