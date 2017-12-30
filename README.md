@@ -12,7 +12,7 @@ There is no attribute binding, there is no common event message pipe, there are 
 
 ### Browser Compatibility
 
-Invented should be compatible with any browser, however, Javascript functionality will only work for browsers with support for `querySelector` and `querySelectorAll`
+Invented should be compatible with any browser as it's designed to run mostly server-side or developer-side.
 
 (TODO - what browsers support these)
 
