@@ -60,7 +60,7 @@ for (var i = 0; i < slides.length; i += 1) {
 	$dot.className = "dot"
 	$dot.dataset.slide = i
 	$dot.addEventListener("click", function clickHandler () {
-		console.log("click!", this.dataset.slide)
+		////console.log("click!", this.dataset.slide)
 		clearTimeout(autoSlideTimer)
 		autoSlideTimer = window.setTimeout(autoSlide, AUTO_SLIDE_TIME)
 		setSlide(parseInt(this.dataset.slide))

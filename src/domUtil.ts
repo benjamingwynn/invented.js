@@ -30,10 +30,10 @@ export function copyDOMAttributes (oldElement:Element, newElement:Element, onlyC
 
 		const hasAttr = newElement.hasAttribute(name)
 
-		console.log("hasAttr", name, hasAttr, "| onlyCopyNew", onlyCopyNew)
+		////console.log("hasAttr", name, hasAttr, "| onlyCopyNew", onlyCopyNew)
 
 		if (!onlyCopyNew || (onlyCopyNew && !hasAttr)) {
-			console.log("copying")
+			////console.log("copying")
 			newElement.setAttribute(name, value)
 		}
 	}

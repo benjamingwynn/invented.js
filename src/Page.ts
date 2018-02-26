@@ -29,19 +29,19 @@ export class Page {
 	private getUnconstructedElements (callback : (node:HTMLUnknownElement) => void) : number {
 		let n:number = 0
 
-		console.log("Finding invented elements...")
+		//console.log("Finding invented elements...")
 
 		/*
 			Any element which isn't a default HTML element
 		*/
 		this.dom.window.document.querySelectorAll("invention").forEach((node:any) => {
-			console.log("Found invented obj no.", n)
+			//console.log("Found invented obj no.", n)
 
 			n += 1
 			callback(node)
 		})
 
-		console.log("Total", n, "invented DOMobjects")
+		//console.log("Total", n, "invented DOMobjects")
 
 		return n
 	}
@@ -58,7 +58,7 @@ export class Page {
 
 		let loadedContextJS:boolean
 
-		console.log("Injecting common CSS into the page")
+		//console.log("Injecting common CSS into the page")
 
 		const style = document.createElement("style")
 		style.innerHTML = `.${noJSClass}{display: none}`
@@ -72,10 +72,10 @@ export class Page {
 			constructNode(node)
 		})
 
-		console.log("Injected CSS")
+		//console.log("Injected CSS")
 
 		function finishedBuilding () {
-			console.log("Finished required component construction.")
+			//console.log("Finished required component construction.")
 
 			// inherit
 			while (true) { // lol
@@ -85,7 +85,7 @@ export class Page {
 
 				oldElement.removeAttribute("invention-slot")
 
-				console.log(oldElement.tagName)
+				//console.log(oldElement.tagName)
 				// const newElement:Element = document.createElement("div")
 				const newElement:Element = document.createElement(oldElement.tagName === "INVENTION" ? "DIV" : oldElement.tagName)
 
@@ -98,11 +98,11 @@ export class Page {
 				oldElement.outerHTML = newElement.outerHTML
 			}
 
-			console.log("Moved nodes to new element from <invention> ")
+			//console.log("Moved nodes to new element from <invention> ")
 
 			document.querySelectorAll("[invention-jsonly]").forEach((node) => {
 				node.removeAttribute("invention-jsonly")
-				console.log("Found node which should only be shown when JS is enabled")
+				//console.log("Found node which should only be shown when JS is enabled")
 				node.classList.add(noJSClass)
 			})
 
@@ -110,13 +110,13 @@ export class Page {
 			// FUTURE: there is probably a better way to do this
 			const unconstructedNodes:NodeListOf<Element> = document.querySelectorAll("invention")
 			for (let nodeI = 0; nodeI < unconstructedNodes.length; nodeI += 1) {
-				console.log("[!] An invention still exists that hasn't been constructed. I'm going to try and construct it")
+				//console.log("[!] An invention still exists that hasn't been constructed. I'm going to try and construct it")
 				nTotal += 1 // add one to total so that this callback will be called again
 				constructNode(<HTMLElement> unconstructedNodes[nodeI])
 				return
 			}
 
-			console.log("... no more additional inventions to construct ...")
+			//console.log("... no more additional inventions to construct ...")
 
 			// handle custom root declarations
 			document.querySelectorAll("[invention-root]").forEach((node) => {
@@ -125,12 +125,12 @@ export class Page {
 				const parent = node.parentElement
 
 				if (parent) {
-					console.log("OKAY", parent)
+					//console.log("OKAY", parent)
 					// node.removeAttribute("invention-root")
 
 					// copy all of the attributes from the nodes parent to the node
 					copyDOMAttributes(parent, node, true)
-					console.log(node.outerHTML)
+					//console.log(node.outerHTML)
 
 					// create the concatenated class string
 					const realClass:string = parent.className + " " + node.className
@@ -141,7 +141,7 @@ export class Page {
 
 					// set the node parent outer html to the nodes outer html
 					parent.outerHTML = node.outerHTML
-					console.log("New class name is ", realClass)
+					//console.log("New class name is ", realClass)
 				} else {
 					throw new Error("Weird. No parentElement found on an [invention-root] node. Are you using the invention-root attribute correctly?")
 				}
@@ -149,7 +149,7 @@ export class Page {
 			})
 
 			if (callback) {
-				console.log("[DONE] Firing callback")
+				//console.log("[DONE] Firing callback")
 				callback(that)
 			}
 		}
@@ -172,7 +172,7 @@ export class Page {
 		}
 
 		function constructNode (node:HTMLElement) {
-			console.log("Constructing component...")
+			//console.log("Constructing component...")
 
 			// I don't know what element this is, so construct its component
 			const componentName:string = <string> node.getAttribute("name") // TODO: throw exception if component is not defined on element
@@ -180,7 +180,7 @@ export class Page {
 			// const componentExists = await composer.checkForComponent(componentName)
 			manifestRetriever.doesManifestExist(componentName).then((exists) => {
 				if (exists) {
-					console.log("The component manifest exists, so that's good.", componentName)
+					//console.log("The component manifest exists, so that's good.", componentName)
 				} else {
 					console.warn("Could not find the manifest for:", componentName)
 
@@ -192,7 +192,7 @@ export class Page {
 				}
 
 				if (!componentBuilders[componentName]) {
-					console.log("Requesting component construction for", componentName)
+					//console.log("Requesting component construction for", componentName)
 
 					// Request the component be built
 					const promise:Promise<Component> = composeComponent(componentName, node.innerHTML)
@@ -200,18 +200,18 @@ export class Page {
 					componentBuilders[componentName] = promise
 
 					promise.then((component) => {
-						console.log("Constructed a new component, checking for JS", componentName)
+						//console.log("Constructed a new component, checking for JS", componentName)
 
 						if (!component.js) {
 							console.warn("The component", component.name, "doesn't seem to have any Javascript")
 							return
 						}
 
-						console.log("This component is Javascript enabled...")
+						//console.log("This component is Javascript enabled...")
 
 						/* Add the page bootstrap if we don't already have it! */
 						if (!loadedContextJS) {
-							console.log("Injecting Context.js into the page")
+							//console.log("Injecting Context.js into the page")
 
 							const script = document.createElement("script")
 							script.innerHTML = BOOTSTRAP_JS
@@ -226,7 +226,7 @@ export class Page {
 					})
 
 					promise.then((component) => {
-						console.log("Constructed a new component, checking for CSS", componentName)
+						//console.log("Constructed a new component, checking for CSS", componentName)
 
 						if (!component.css) {
 							console.warn("The component", component.name, "doesn't seem to have any CSS")
@@ -257,7 +257,7 @@ export class Page {
 					that.componentInstances.push(componentInstance)
 
 					if (component.js) {
-						// console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
+						// //console.log("Added a component. Asking it to load its JS too.", component.tag, componentInstance.uid)
 
 						const script = document.createElement("script")
 						script.innerHTML = `window._inventedComponents["${component.name}"](document.querySelector("[data-invented-id='${componentInstance.uid}']"))`
@@ -266,7 +266,7 @@ export class Page {
 
 					nBuilt += 1
 
-					console.log("nBuilt", nBuilt)
+					//console.log("nBuilt", nBuilt)
 
 					if (nBuilt === nTotal) {
 						finishedBuilding()

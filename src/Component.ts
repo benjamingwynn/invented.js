@@ -14,7 +14,7 @@ export class Component {
 
 	constructor (public name:string, public readonly dom:jsdom.JSDOM, public css?:string, public js?:string) {
 		// Construct the DOM
-		console.log(`>> Constructed a new ${name} Component, how exciting. This should only be called once per component type.`)
+		////console.log(`>> Constructed a new ${name} Component, how exciting. This should only be called once per component type.`)
 
 		// var context = {title: "My New Post", body: "This is my first post!"}
 		// var html    = template(context)
@@ -78,6 +78,6 @@ export class ComponentInstance {
 			node.className += " " + this.component.cssNamespace.namespace
 		}
 
-		console.log(`Constructed a new ComponentInstance of type ${component.name}, it has a UID of ${this.uid}.`)
+		////console.log(`Constructed a new ComponentInstance of type ${component.name}, it has a UID of ${this.uid}.`)
 	}
 }
