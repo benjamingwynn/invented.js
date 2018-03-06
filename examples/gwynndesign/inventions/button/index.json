@@ -1,0 +1,9 @@
+{
+	"meta": {
+		"name": "A Button"
+	},
+	"code": {
+		"html": "<a invention-root invention-slot></a>",
+		"css": ["./button.css"]
+	}
+}

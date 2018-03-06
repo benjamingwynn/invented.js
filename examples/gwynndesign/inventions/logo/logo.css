@@ -1,0 +1,85 @@
+/* logo style */
+
+.logo {
+/*	filter: drop-shadow(0 0 0.015em rgba(0,0,0,0.65));*/
+	width: 1em;
+	height: 1em;
+}
+
+.logo, .logo * {
+	animation-fill-mode: both;
+	transform-origin: center;
+	transition: all 0.3s;
+}
+
+.logo__outer, .logo__inner, .logo__hex--line {
+	animation-duration: 0.6s;
+}
+
+.logo__outer, .logo__hex--line {
+	animation-name: punchin;
+}
+
+.logo__inner {
+	animation-name: zoomin;
+}
+
+.logo__hex {
+	fill: none;
+	stroke: none;
+}
+
+.logo__hex--fill {
+	fill: white;
+}
+
+.logo__g, .logo__bridge {
+	fill: rgba(0, 0, 0, 0.10);
+}
+
+.logo__g, .logo__bridge, .logo__sep, .logo__hex--line {
+	stroke: #222;
+	stroke-width: 1.5px;
+}
+
+.logo__g, .logo__bridge, .logo__sep {
+	animation-delay: 0.6s;
+	animation-duration: .3s;
+	animation-name: strokein;
+}
+
+/* logo keyframes */
+
+@keyframes strokein {
+	from {
+		stroke-opacity: 0;
+	}
+
+	to {
+		stroke-opacity: 1;
+	}
+}
+
+@keyframes punchin {
+	from {
+		transform: scale(1.1);
+		opacity: 0;
+	}
+
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+
+@keyframes zoomin {
+	from {
+		transform: scale(.69);
+		opacity: 0;
+	}
+
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}

@@ -28,13 +28,18 @@ export function copyDOMAttributes (oldElement:Element, newElement:Element, onlyC
 		const name = oldElement.attributes[i].name
 		const value = oldElement.attributes[i].value
 
-		const hasAttr = newElement.hasAttribute(name)
+		if (name === "class") {
+			// inherit class list instead
+			newElement.className += " " + oldElement.className
+		} else {
+			const hasAttr = newElement.hasAttribute(name)
 
-		console.log("hasAttr", name, hasAttr, "| onlyCopyNew", onlyCopyNew)
+			console.log("hasAttr", name, hasAttr, "| onlyCopyNew", onlyCopyNew)
 
-		if (!onlyCopyNew || (onlyCopyNew && !hasAttr)) {
-			console.log("copying")
-			newElement.setAttribute(name, value)
+			if (!onlyCopyNew || (onlyCopyNew && !hasAttr)) {
+				console.log("copying")
+				newElement.setAttribute(name, value)
+			}
 		}
 	}
 }

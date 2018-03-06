@@ -1,0 +1,10 @@
+{
+	"meta": {
+		"name": "Site Header"
+	},
+
+	"code": {
+		"html": ["./site-header.html"],
+		"css": ["header.css"]
+	}
+}

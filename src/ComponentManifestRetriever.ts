@@ -1,5 +1,6 @@
 import ComponentManifest from "./ComponentManifest"
 import * as fs from "fs-extra"
+import * as fsUtil from "./fsUtil"
 
 export abstract class ComponentManifestRetriever {
 	public abstract getManifest (componentName:string) : Promise <ComponentManifest>
@@ -22,25 +23,43 @@ export class ComponentManifestRetrieverFS extends ComponentManifestRetriever {
 	}
 
 	doesManifestExist (componentName:string) : Promise <boolean> {
-		return new Promise(async resolve => {
-			resolve(await Boolean(fs.access(this.generatePath(componentName), fs.constants.R_OK)))
-		})
+		console.log("Checking if manifest exists:", componentName)
+		return fsUtil.isFileReadable(this.generatePath(componentName))
 	}
 
 	getManifest (componentName:string) : Promise <ComponentManifest> {
 		return new Promise(async (resolve, reject) => {
-			const json = await fs.readJSON(this.generatePath(componentName))
+			try {
+				const json = await fs.readJSON(this.generatePath(componentName))
 
-			// safety
-			if (!json.code) reject("no code object")
-			if (!json.code.html) reject("no code.html")
+				if (!json.code) {
+					json.code = {}
+				}
 
-			// string to array
-			if (typeof json.code.html === "string") json.code.html = [json.code.html]
-			if (typeof json.code.css === "string") json.code.css = [json.code.css]
-			if (typeof json.code.js === "string") json.code.js = [json.code.js]
+				// string to array
+				if (typeof json.code.html === "string") json.code.html = [json.code.html]
+				if (typeof json.code.css === "string") json.code.css = [json.code.css]
+				if (typeof json.code.js === "string") json.code.js = [json.code.js]
 
-			resolve(json)
+				const cDir:string = this.workingDirectory + componentName + "/"
+
+				if (typeof json.code.html === "undefined") {
+					if (await fsUtil.isFileReadable(cDir + "index.html")) {
+						json.code.html = ["./index.html"]
+					} else {
+						throw new Error("No index provided, and default index.html does not exist. Consult the documentation.")
+					}
+				}
+
+				if (typeof json.code.js === "undefined") json.code.js = [(await fsUtil.isFileReadable(cDir + "index.js")) ? "index.js" : ""]
+				if (typeof json.code.css === "undefined") json.code.css = [(await fsUtil.isFileReadable(cDir + "index.css")) ? "index.css" : ""]
+
+				console.log(json)
+
+				resolve(json)
+			} catch (ex) {
+				reject(ex)
+			}
 		})
 	}
 }

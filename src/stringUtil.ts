@@ -70,3 +70,23 @@ export function replaceAll (target:string, replaceThis:string|Array<string>, wit
 export function purgeString (target:string, purgeThis:string|Array<string>) : string {
 	return replaceAll(target, purgeThis, "")
 }
+
+export function stringContains (target:string, contains:string) : Boolean {
+	return target.indexOf(contains) > -1
+}
+
+export function stringEndsIn (target:string, endsIn:string|Array<string>) : boolean {
+	let endsArray:string[]
+
+	if (typeof endsIn === "string") {
+		endsArray = [endsIn]
+	} else {
+		endsArray = endsIn
+	}
+
+	for (let i:number = 0; i < endsArray.length; i += 1) {
+		if (target.indexOf(endsArray[i]) === target.length - endsArray[i].length) return true
+	}
+
+	return false
+}

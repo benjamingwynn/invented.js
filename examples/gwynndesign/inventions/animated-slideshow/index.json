@@ -1,0 +1,10 @@
+{
+	"meta": {
+		"title": "Animated Slideshow"
+	},
+
+	"code": {
+		"html": ["./slideshow.html"],
+		"css": ["./slideshow.css"]
+	}
+}

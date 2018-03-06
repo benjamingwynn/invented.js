@@ -1,0 +1,10 @@
+{
+	"meta": {
+		"name": "Gwynn Design Logo"
+	},
+
+	"code": {
+		"html": ["./logo.svg"],
+		"css": ["./logo.css"]
+	}
+}

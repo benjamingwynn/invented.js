@@ -1,20 +1,23 @@
 import * as fs from "fs"
 
 import {ComponentManifestRetrieverFS} from "./ComponentManifestRetriever"
-import {ComponentManifestHandlerFS} from "./ComponentManifestHandler"
+import {ComponentManifestHandlerAuto} from "./ComponentManifestHandler"
 import {Page} from "./Page"
 
 // Enable source map suport on node.js
 require("source-map-support").install()
 process.on("unhandledRejection", console.error)
 
+const PATH:string = "./examples/gwynndesign/"
+
 function buildTestHelloWorldPage () {
-	const page = new Page(
-		fs.readFileSync("./examples/hello-world-2/index.html", "utf-8"),
-		new ComponentManifestRetrieverFS("./examples/hello-world-2/components/"),
-		new ComponentManifestHandlerFS("./examples/hello-world-2/components/"
-	), () => {
-		fs.writeFileSync("./build/hello-world-2.html", page.render())
+	new Page(
+		fs.readFileSync(PATH + "index.html", "utf-8"),
+		new ComponentManifestRetrieverFS(PATH + "inventions/"),
+		// new ComponentManifestHandlerFS(PATH + "inventions/"),
+		new ComponentManifestHandlerAuto(PATH + "inventions/"),
+	(page:Page) => {
+		fs.writeFileSync("./build/index.html", page.render())
 	})
 }
 

@@ -108,7 +108,7 @@ export class Page {
 
 			// Find any unconstructed nodes and construct them.
 			// FUTURE: there is probably a better way to do this
-			const unconstructedNodes:NodeListOf<Element> = document.querySelectorAll("invention")
+			const unconstructedNodes:NodeListOf<Element> = document.querySelectorAll("invention:not([invented-no-manifest-found]):not([invented-construction-failed])")
 			for (let nodeI = 0; nodeI < unconstructedNodes.length; nodeI += 1) {
 				console.log("[!] An invention still exists that hasn't been constructed. I'm going to try and construct it")
 				nTotal += 1 // add one to total so that this callback will be called again
@@ -147,19 +147,22 @@ export class Page {
 		}
 
 		function composeComponent (componentName:string, innerHTML?:string) : Promise<Component> {
-			// TODO: innerHTML handling
-			return new Promise (async (resolve) => {
-				const manifest:ComponentManifest = await manifestRetriever.getManifest(componentName)
-				//const manifestHandler:ComponentManifestHandler = new ManifestHandler()
+			return new Promise (async (resolve, reject) => {
+				try {
+					const manifest:ComponentManifest = await manifestRetriever.getManifest(componentName)
 
-				resolve(
-					new Component(
-						componentName,
-						await manifestHandler.html(manifest, componentName),
-						await manifestHandler.css(manifest, componentName),
-						await manifestHandler.js(manifest, componentName)
+					resolve(
+						new Component(
+							componentName,
+							await manifestHandler.html(manifest, componentName),
+							await manifestHandler.css(manifest, componentName),
+							await manifestHandler.js(manifest, componentName)
+						)
 					)
-				)
+				} catch (ex) {
+					console.error("BLUGH")
+					reject(ex)
+				}
 			})
 		}
 
@@ -169,18 +172,21 @@ export class Page {
 			// I don't know what element this is, so construct its component
 			const componentName:string = <string> node.getAttribute("name") // TODO: throw exception if component is not defined on element
 
+			function skip () {
+				nBuilt += 1
+				if (nBuilt === nTotal) finishedBuilding()
+			}
+
 			// const componentExists = await composer.checkForComponent(componentName)
-			manifestRetriever.doesManifestExist(componentName).then((exists) => {
+			manifestRetriever.doesManifestExist(componentName)
+			.then((exists) => {
 				if (exists) {
 					console.log("The component manifest exists, so that's good.", componentName)
 				} else {
 					console.warn("Could not find the manifest for:", componentName)
+					node.setAttribute("invented-no-manifest-found", componentName)
 
-					nBuilt += 1
-
-					if (nBuilt === nTotal) finishedBuilding()
-
-					return
+					return skip()
 				}
 
 				if (!componentBuilders[componentName]) {
@@ -190,6 +196,10 @@ export class Page {
 					const promise:Promise<Component> = composeComponent(componentName, node.innerHTML)
 
 					componentBuilders[componentName] = promise
+
+					promise.catch((ex) => {
+						console.log(" .... An exception was just thrown. Oh dear")
+					})
 
 					promise.then((component) => {
 						console.log("Constructed a new component, checking for JS", componentName)
@@ -259,6 +269,19 @@ export class Page {
 					nBuilt += 1
 
 					console.log("nBuilt", nBuilt)
+
+					if (nBuilt === nTotal) {
+						finishedBuilding()
+					}
+				})
+
+				componentBuilders[componentName].catch(() => {
+					nBuilt += 1
+
+					console.log("nBuilt", nBuilt)
+
+					node.setAttribute("invented-construction-failed", componentName)
+
 
 					if (nBuilt === nTotal) {
 						finishedBuilding()

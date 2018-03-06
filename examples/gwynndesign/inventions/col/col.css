@@ -1,0 +1,23 @@
+:root {
+	display: flex;
+	flex-flow: column nowrap;
+	flex: 33% 1 0;
+	align-items: center;
+	padding: 2.5rem var(--site-gutter);
+}
+
+.txt {
+	display: flex;
+	flex-flow: column nowrap;
+	flex: auto 1 0;
+	text-align: center;
+	padding: 2em 0;
+	align-content: center;
+}
+
+
+.img {
+	font-size: 13em;
+	max-width: 100%;
+	height: 1em;
+}

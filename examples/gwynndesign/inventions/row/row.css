@@ -1,0 +1,18 @@
+:root {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: stretch;
+	padding: 2.5rem var(--site-gutter);
+}
+
+.txt {
+	display: flex;
+	flex-flow: column nowrap;
+	flex: auto 1 0;
+}
+
+.img {
+	font-size: 13em;
+	width: 1em;
+	height: 100%;
+}

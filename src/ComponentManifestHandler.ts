@@ -1,6 +1,8 @@
 import ComponentManifest from "./ComponentManifest"
 import * as fs from "fs-extra"
+import * as fsUtil from "./fsUtil"
 import * as jsdom from "jsdom"
+import * as stringUtil from "./stringUtil"
 
 export abstract class ComponentManifestHandler {
 	public constructor () {
@@ -12,8 +14,40 @@ export abstract class ComponentManifestHandler {
 	public abstract js (manifest:ComponentManifest, componentName:string) : Promise<string|undefined>
 }
 
-function stackDOMS () {
+function stackDOMS (htmlStrings:string[]) : jsdom.JSDOM {
+	const len = htmlStrings.length
+	let dom:jsdom.JSDOM|null = null
 
+	for (let i = 0; i < len; i += 1) {
+		const blob = htmlStrings[i]
+
+		const newDom = new jsdom.JSDOM(blob.toString())
+
+		if (dom) {
+			// get elements with declared id's
+			const nodes = newDom.window.document.body.querySelectorAll("*[id]")
+
+			for (let nodeIndex = 0; nodes.length; nodeIndex += 1) {
+				const node:Element = nodes[nodeIndex]
+				// ...
+				const existing = dom.window.document.body.querySelector(`#${node.id}`)
+
+				if (existing) {
+					// override
+					existing.outerHTML = node.outerHTML
+				}
+			}
+
+		} else {
+			dom = newDom
+		}
+	}
+
+	if (!dom) {
+		throw new Error("Missing DOM. Is HTML declared in your manifest?")
+	}
+
+	return dom
 }
 
 /** Loads the manifest assets from the Filesystem */
@@ -22,46 +56,26 @@ export class ComponentManifestHandlerFS extends ComponentManifestHandler {
 		super()
 	}
 
-	private generatePath (componentName:string) {
+	protected generatePath (componentName:string) {
 		return this.workingDirectory + componentName + "/"
 	}
 
 	public html (manifest:ComponentManifest, componentName:string) : Promise<jsdom.JSDOM> {
 		return new Promise (async (resolve) => {
+			// Get all of the files
+
 			try {
-				let dom:jsdom.JSDOM|null = null
+				const promises:Promise<string>[] = []
 
 				const len = manifest.code.html.length
 				for (let i = 0; i < len; i += 1) {
-					const blob = await fs.readFile(this.generatePath(componentName) + manifest.code.html[i])
-
-					const newDom = new jsdom.JSDOM(blob.toString())
-
-					if (dom) {
-						// get elements with declared id's
-						const nodes = newDom.window.document.body.querySelectorAll("*[id]")
-
-						for (let nodeIndex = 0; nodes.length; nodeIndex += 1) {
-							const node:Element = nodes[nodeIndex]
-							// ...
-							const existing = dom.window.document.body.querySelector(`#${node.id}`)
-
-							if (existing) {
-								// override
-								existing.outerHTML = node.outerHTML
-							}
-						}
-
-					} else {
-						dom = newDom
-					}
+					promises.push(fs.readFile(this.generatePath(componentName) + manifest.code.html[i], "utf-8"))
 				}
 
-				if (!dom) {
-					throw "Missing DOM. Is HTML declared in your manifest?"
-				}
-
-				resolve (dom)
+				// ...
+				Promise.all(promises).then((result) => {
+					resolve(stackDOMS(result))
+				})
 
 				// const blob = await fs.readFile(this.generatePath(componentName) + manifest.code.html[0])
 				// const html = blob.toString()
@@ -81,7 +95,7 @@ export class ComponentManifestHandlerFS extends ComponentManifestHandler {
 				for (let i = 0, n = manifest.code.css.length; i < n; i += 1) {
 					const path = this.generatePath(componentName) + files[i]
 
-					if (!Boolean(await fs.access(path, fs.constants.R_OK))) {
+					if (await fsUtil.isFileReadable(path)) {
 						css += (await fs.readFile(path, "utf-8"))
 					} else {
 						console.warn("File declared but I can't access it, maybe it doesn't exist:", files[i])
@@ -122,20 +136,20 @@ export class ComponentManifestHandlerFS extends ComponentManifestHandler {
 
 /** Uses the string specified in the manifest as the source code to construct the invention. Useful for small components */
 export class ComponentManifestHandlerInline extends ComponentManifestHandler {
-	public html(manifest: ComponentManifest, componentName: string): Promise<jsdom.JSDOM> {
+	public html (manifest: ComponentManifest, componentName: string): Promise<jsdom.JSDOM> {
 		// TODO: DOM Stacking
 		return new Promise((resolve) => {
 			resolve(new jsdom.JSDOM(manifest.code.html.join("\n")))
 		})
 	}
 
-	public css(manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
+	public css (manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
 		return new Promise((resolve) => {
 			resolve(manifest.code.css.join("\n"))
 		})
 	}
 
-	public js(manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
+	public js (manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
 		return new Promise((resolve) => {
 			resolve(manifest.code.js.join("\n"))
 		})
@@ -143,14 +157,61 @@ export class ComponentManifestHandlerInline extends ComponentManifestHandler {
 }
 
 /** Automatically decides which component manifest handler to use based on the string. Slower than using the manifest handlers directly, but easier to use. */
-export class ComponentManifestHandlerAuto extends ComponentManifestHandler {
-	public html(manifest: ComponentManifest, componentName: string): Promise<jsdom.JSDOM> {
-		throw new Error("Method not implemented.");
+export class ComponentManifestHandlerAuto extends ComponentManifestHandlerFS {
+	private isValidPath (path:string, extensions:string|string[]) : Promise <boolean> {
+		return new Promise((resolve) => {
+			// FUTURE: if the path looks correct, try to resolve it - if it does not resolve, return false
+			resolve(path.indexOf("./") === 0 || path.indexOf("/") === 0 || stringUtil.stringEndsIn(path, extensions))
+		})
 	}
-	public css(manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
-		throw new Error("Method not implemented.");
+
+	private handleLines (componentName: string, lines:string[], extensions:string[]|string) : Promise<string[]> {
+		return new Promise(async (resolve) => {
+			const promises:Promise<string>[] = []
+			const n:number = lines.length
+
+			if (n === 0) {
+				// throw new Error("Array is empty.")
+				return resolve([""])
+			}
+
+			for (let i:number = 0; i < n; i += 1) {
+				const line:string = lines[i]
+
+				if (await this.isValidPath(line, extensions)) {
+					console.log("~ This looks like a valid path to me:", line)
+					// load the path from the filesystem
+					promises.push(fs.readFile(this.generatePath(componentName) + line, "utf-8"))
+				} else {
+					// inline
+					console.log("~ This seems to be inline code:", line, extensions)
+
+					promises.push(new Promise ((resolve) => resolve(line))) // mask as a promise to make it easier to handle completion
+				}
+			}
+
+			Promise.all(promises).then((results) => resolve(results))
+		})
 	}
-	public js(manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
-		throw new Error("Method not implemented.");
+
+	public html (manifest: ComponentManifest, componentName: string): Promise<jsdom.JSDOM> {
+		return new Promise(async (resolve) => {
+			const results:string[] = await this.handleLines(componentName, manifest.code.html, [".html", ".htm", ".hbs", ".svg", ".xml"])
+			resolve(stackDOMS(results))
+		})
+	}
+
+	public css (manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
+		return new Promise(async (resolve) => {
+			resolve((await this.handleLines(componentName, manifest.code.css, ".css")).join("\n"))
+		})
+		// throw new Error("Method not implemented.");
+	}
+
+	public js (manifest: ComponentManifest, componentName: string): Promise<string | undefined> {
+		return new Promise(async (resolve) => {
+			resolve((await this.handleLines(componentName, manifest.code.js, ".js")).join("\n"))
+		})
+		// throw new Error("Method not implemented.");
 	}
 }
